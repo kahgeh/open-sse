@@ -1,0 +1,11 @@
+[environment]
+debug = "false"
+
+[http]
+port = "8081"
+url_prefix = "/sse"
+allowed_origin = "ignored"
+
+[logging]
+level = "INFO"
+correlation_id_http_header = "x-correlation-id"

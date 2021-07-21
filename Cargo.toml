@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "server",
+    "broker",
+    "app-ops",
+    "actix-web-utils"
+]

@@ -1,0 +1,73 @@
+name: Release
+
+permissions:
+  # TODO: once `releases: write` is supported, use it instead.
+  contents: write
+
+on:
+  push:
+    tags:
+      - v[0-9]+.*
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+  RUST_BACKTRACE: 1
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  create-release:
+    if: github.repository_owner == 'kahgeh'
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          title: $version
+          branch: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+  upload-assets:
+    name: ${{ matrix.target }}
+    if: github.repository_owner == 'kahgeh'
+    needs:
+      - create-release
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-18.04
+          - target: x86_64-apple-darwin
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: taiki-e/github-actions/install-rust@main
+        with:
+          toolchain: stable
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: open-sse-server
+          target: ${{ matrix.target }}
+          tar: all
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CARGO_PROFILE_RELEASE_LTO: true          
+      - uses: taiki-e/upload-rust-binary-action@v1          
+        with:
+          bin: open-sse-broker
+          target: ${{ matrix.target }}
+          tar: all
+          zip: windows          
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          CARGO_PROFILE_RELEASE_LTO: true

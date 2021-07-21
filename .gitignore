@@ -1,0 +1,7 @@
+.idea
+target
+config/**/local.toml
+dist
+**/dist
+**/node_modules
+**/.cache

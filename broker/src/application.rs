@@ -2,7 +2,7 @@ use actix_web::{ App, HttpServer, web::{scope,Data}};
 use tracing_actix_web::TracingLogger;
 use derive_more::{Display, Error};
 
-use app_ops::{utils::HttpSettings,AppOpsExt, HttpAppRootSpanBuilder};
+use app_ops::{utils::HttpSettings, AppOpsExt, HttpAppRootSpanBuilder, GetAppInfoResponseBuild};
 use actix_web::dev::Server;
 
 use crate::settings::{AppSettings};
@@ -33,11 +33,14 @@ impl Application {
 
         let url_prefix = self.settings.url_prefix.clone();
         let app_settings = Data::new(app_settings);
+        let app_info_response_build:Data<GetAppInfoResponseBuild> =
+            Data::new(app_settings.into_get_app_info_response_build());
         let server=HttpServer::new(move ||{
             App::new()
                 .app_data(Data::clone(&app_settings))
                 .app_data(Data::new(app_settings.settings.clone()))
                 .app_data(Data::new(app_settings.runtime_info.clone()))
+                .app_data(Data::clone(&app_info_response_build))
                 .wrap(TracingLogger::<HttpAppRootSpanBuilder<AppSettings>>::new())
                 .use_ops_endpoints()
                 .service(

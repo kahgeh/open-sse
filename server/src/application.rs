@@ -2,7 +2,7 @@ use actix_web::{ App, HttpServer, web::{scope,Data}};
 use tracing_actix_web::TracingLogger;
 use derive_more::{Display, Error};
 
-use app_ops::{utils::HttpSettings,AppOpsExt, HttpAppRootSpanBuilder};
+use app_ops::{utils::HttpSettings, AppOpsExt, HttpAppRootSpanBuilder, GetAppInfoResponseBuild};
 use actix_web_utils::create_cors_policy;
 use actix_web::dev::Server;
 use tokio::task::JoinHandle;
@@ -39,11 +39,14 @@ impl Application {
         let app_settings = Data::new(app_settings);
         let (sse_exchange_task, sse_exchange) = SseExchange::start();
         let sse_exchange = Data::new(sse_exchange);
+        let app_info_response_build:Data<GetAppInfoResponseBuild> =
+            Data::new(app_settings.into_get_app_info_response_build());
         let server=HttpServer::new(move ||{
             App::new()
                 .app_data(Data::clone(&app_settings))
                 .app_data(Data::new(app_settings.settings.clone()))
                 .app_data(Data::new(app_settings.runtime_info.clone()))
+                .app_data(Data::clone(&app_info_response_build))
                 .app_data(sse_exchange.clone())
                 .wrap(create_cors_policy(&app_settings.settings.http.allowed_origin))
                 .wrap(TracingLogger::<HttpAppRootSpanBuilder<AppSettings>>::new())

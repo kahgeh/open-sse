@@ -1,3 +1,5 @@
+app_info_response_case ="Default"
+
 [environment]
 debug = "false"
 

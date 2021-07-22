@@ -5,10 +5,12 @@ use actix_web::{Responder, HttpResponse, App, web};
 use actix_web::web::Data;
 use serde::{Serialize,Deserialize};
 use actix_web::body::{MessageBody};
-use actix_web::dev::{ServiceRequest, ServiceResponse};
+use actix_web::dev::{ServiceRequest, ServiceResponse, AnyBody};
 use actix_web::error::Error;
 use actix_service::{ServiceFactory};
+use tracing::{error};
 use crate::utils::get_one_host_ip_address;
+use crate::AppInfoResponseCase::Pascal;
 
 
 pub const DATE_ISO_FORMAT:&str="[year]-[month]-[day] [hour]:[minute]:[second]";
@@ -20,6 +22,61 @@ pub struct GetAppInfoResponse {
     pub started : String,
     pub current_time : String,
     pub ip_address: String,
+}
+
+impl From<&RuntimeInfo> for GetAppInfoResponse {
+    fn from(runtime_info: &RuntimeInfo) -> Self {
+        GetAppInfoResponse{
+            app_name: runtime_info.app_name.clone(),
+            git_commit_id: runtime_info.git_commit_id.clone(),
+            started: runtime_info.started.clone(),
+            current_time: format_date_time(SystemTime::now(),DATE_ISO_FORMAT),
+            ip_address: runtime_info.ip_address.clone(),
+        }
+    }
+}
+
+impl GetAppInfoResponse {
+    pub fn replace_current_time(&self)->GetAppInfoResponse{
+        GetAppInfoResponse {
+            app_name: self.app_name.to_string(),
+            git_commit_id: self.git_commit_id.to_string(),
+            started: self.started.to_string(),
+            current_time: format_date_time(SystemTime::now(),DATE_ISO_FORMAT),
+            ip_address: self.ip_address.to_string()
+        }
+    }
+}
+
+#[derive(Clone, Deserialize, Debug)]
+pub enum AppInfoResponseCase {
+    Default,
+    Pascal,
+}
+
+pub struct GetAppInfoResponseBuild {
+    pub response: GetAppInfoResponse,
+    pub json_case: AppInfoResponseCase,
+}
+
+impl GetAppInfoResponseBuild {
+    pub fn get_response(&self)->String {
+        match &self.json_case {
+            Pascal=>format!("{{\"AppName\": \"{}\", \"GitCommitId\": \"{}\", \"Started\": \"{}\", \"CurrentTime\": \"{}\", \"IpAddress\":\"{}\"}}",
+                            self.response.app_name.clone(),
+                            self.response.git_commit_id.clone(),
+                            self.response.started.clone(),
+                            format_date_time(SystemTime::now(), DATE_ISO_FORMAT),
+                            self.response.ip_address.clone()),
+            _ => match serde_json::to_string(&self.response.replace_current_time()) {
+                Ok(json_string)=>json_string,
+                Err(_)=> {
+                    error!("fail to convert app info response to json");
+                    "{}".to_string()
+                }
+            },
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -61,14 +118,11 @@ pub async fn ping() -> impl Responder {
     format!("application running\n")
 }
 
-pub async fn app_info(runtime_info:Data<RuntimeInfo>)-> impl Responder {
-    HttpResponse::Ok().json(GetAppInfoResponse{
-        app_name: runtime_info.app_name.clone(),
-        git_commit_id: runtime_info.git_commit_id.clone(),
-        started: runtime_info.started.clone(),
-        current_time: format_date_time(SystemTime::now(),DATE_ISO_FORMAT),
-        ip_address: runtime_info.ip_address.clone(),
-    })
+
+pub async fn app_info(response_build: Data<GetAppInfoResponseBuild>)-> impl Responder {
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .body(AnyBody::from(response_build.get_response()))
 }
 
 pub trait AppOpsExt<T,B> {

@@ -1,5 +1,5 @@
 use serde::{Deserialize};
-use app_ops::{utils::HttpSettings,RuntimeInfo, CommonLogAttributes, LogSettings, load_settings};
+use app_ops::{utils::HttpSettings, RuntimeInfo, CommonLogAttributes, LogSettings, load_settings, GetAppInfoResponseBuild, AppInfoResponseCase};
 
 const APP_NAME: &str="open-sse-broker";
 const APP_ENV_PREFIX: &str="SSE_";
@@ -15,6 +15,12 @@ impl AppSettings {
         AppSettings {
             settings: load_settings(APP_ENV_PREFIX, APP_NAME).expect("fail to load settings"),
             runtime_info: RuntimeInfo::new(APP_NAME),
+        }
+    }
+    pub fn into_get_app_info_response_build(&self)->GetAppInfoResponseBuild{
+        GetAppInfoResponseBuild {
+            response: (&self.runtime_info).into(),
+            json_case: self.settings.app_info_response_case.clone()
         }
     }
 }
@@ -35,6 +41,7 @@ pub struct Settings {
     pub environment: ExecutionEnvironment,
     pub http: HttpSettings,
     pub logging: LogSettings,
+    pub app_info_response_case: AppInfoResponseCase,
 }
 
 #[derive(Debug, Deserialize, Clone)]

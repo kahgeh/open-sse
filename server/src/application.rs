@@ -40,7 +40,7 @@ impl Application {
         let (sse_exchange_task, sse_exchange) = SseExchange::start();
         let sse_exchange = Data::new(sse_exchange);
         let app_info_response_build:Data<GetAppInfoResponseBuild> =
-            Data::new(app_settings.into_get_app_info_response_build());
+            Data::new(app_settings.to_get_app_info_response_build());
         let server=HttpServer::new(move ||{
             App::new()
                 .app_data(Data::clone(&app_settings))

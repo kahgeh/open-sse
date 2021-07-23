@@ -11,3 +11,6 @@ allowed_origin = "ignored"
 [logging]
 level = "INFO"
 correlation_id_http_header = "x-correlation-id"
+
+[outgoing_endpoints]
+redis="redis://127.0.0.1"

@@ -7,6 +7,8 @@ use serde::{Deserialize};
 mod settings;
 mod application;
 mod mappers;
+mod contracts;
+mod routes;
 
 #[derive(Debug, Deserialize, Clone)]
 pub enum RunError {
@@ -27,7 +29,7 @@ async fn main()-> Result<(), RunError> {
     info!(Environment=&environment_name[..], IsDebug=&is_debug[..], Port=&port[..], "Application started");
 
     let http_server= match Application::new(app_settings.settings.http.clone())
-        .start(app_settings.clone()){
+        .start(app_settings.clone()).await {
         Ok(services)=>services,
         Err(e)=>{
             error!("fail to start services {:?}", e);

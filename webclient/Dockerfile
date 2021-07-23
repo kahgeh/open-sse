@@ -1,7 +1,11 @@
-FROM node:14 as builder
+FROM node:12 as builder
 WORKDIR /src
 COPY *.json ./
 COPY index.html ./
 RUN npm i
 COPY *.ts* ./
-EXPOSE 1234
+COPY *.js ./
+RUN npm run build
+
+EXPOSE 80
+CMD ["node", "server.js"]

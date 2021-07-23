@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: webclient
+  labels:
+    app: webclient
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  clusterIP: None
+  selector:
+    app: webclient
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webclient
+  labels:
+    app: webclient
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webclient
+  template:
+    metadata:
+      labels:
+        app: webclient
+    spec:
+      containers:
+      - name: webclient
+        image: webclient

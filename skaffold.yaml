@@ -1,0 +1,35 @@
+apiVersion: skaffold/v2beta19
+kind: Config
+metadata:
+  name: open-sse
+build:
+  artifacts:
+  - image: sse-server
+    docker:
+      dockerfile: Server.dockerfile
+  - image: sse-broker
+    docker:
+      dockerfile: Broker.dockerfile
+  - image: webclient
+    context: webclient
+deploy:
+  kubectl:
+    manifests:
+    - infra/server/deployment.yaml
+    - infra/webclient/deployment.yaml
+portForward:
+- resourceType: service
+  resourceName: sse-server
+  port: 80
+  localPort: 8090
+  address: 0.0.0.0
+- resourceType: service
+  resourceName: sse-broker
+  port: 80
+  localPort: 8091
+  address: 0.0.0.0
+- resourceType: service
+  resourceName: webclient
+  port: 80
+  localPort: 8092
+  address: 0.0.0.0

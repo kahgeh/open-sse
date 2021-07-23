@@ -20,7 +20,7 @@ pub fn load_settings<'a, T:Deserialize<'a>>(app_env_prefix: &str, app_name: &str
 
     // Add in settings from the environment (with a prefix of APP)
     // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-    s.merge(Environment::with_prefix(app_env_prefix))?;
+    s.merge(Environment::with_prefix(app_env_prefix).separator("__"))?;
     // Now that we're done, let's access our configuration
 
     // You can deserialize (and thus freeze) the entire configuration as

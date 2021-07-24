@@ -1,4 +1,4 @@
-app_info_response_case ="Default"
+app_info_response_case = "Default"
 
 [environment]
 debug = "false"
@@ -14,3 +14,8 @@ correlation_id_http_header = "x-correlation-id"
 
 [outgoing_endpoints]
 redis="redis://127.0.0.1"
+
+[readiness]
+check="false"
+retry_count="5"
+retry_interval_in_seconds="3"

@@ -1,5 +1,5 @@
 use serde::{Deserialize};
-use app_ops::{utils::HttpSettings, RuntimeInfo, CommonLogAttributes, LogSettings, load_settings, GetAppInfoResponseBuild, AppInfoResponseCase};
+use app_ops::{utils::HttpSettings, RuntimeInfo, CommonLogAttributes, LogSettings, load_settings, GetAppInfoResponseBuild, AppInfoResponseCase, ReadinessSettings};
 
 const APP_NAME: &str="open-sse-broker";
 const APP_ENV_PREFIX: &str="sse";
@@ -48,6 +48,7 @@ pub struct Settings {
     pub logging: LogSettings,
     pub outgoing_endpoints: OutgoingEndpoints,
     pub app_info_response_case: AppInfoResponseCase,
+    pub readiness: ReadinessSettings,
 }
 
 #[derive(Debug, Deserialize, Clone)]

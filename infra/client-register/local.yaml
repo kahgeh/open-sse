@@ -1,33 +1,33 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: sse-broker
+  name: client-register
   labels:
-    app: sse-broker
+    app: client-register
 spec:
   ports:
-  - port: 80
-    protocol: TCP
+    - port: 6379
+      protocol: TCP
   clusterIP: None
   selector:
-    app: sse-broker
+    app: client-register
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sse-broker
+  name: client-register
   labels:
-    app: sse-broker
+    app: client-register
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sse-broker
+      app: client-register
   template:
     metadata:
       labels:
-        app: sse-broker
+        app: client-register
     spec:
       containers:
-      - name: sse-broker
-        image: sse-broker
+        - name: client-register
+          image: redis

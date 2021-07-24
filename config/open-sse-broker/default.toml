@@ -13,7 +13,7 @@ level = "INFO"
 correlation_id_http_header = "x-correlation-id"
 
 [outgoing_endpoints]
-redis="redis://127.0.0.1"
+redis="redis://client-register/"
 
 [readiness]
 check="false"

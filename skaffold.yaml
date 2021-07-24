@@ -15,8 +15,10 @@ build:
 deploy:
   kubectl:
     manifests:
-    - infra/server/deployment.yaml
-    - infra/webclient/deployment.yaml
+    - infra/broker/local.yaml
+    - infra/server/local.yaml
+    - infra/webclient/local.yaml
+    - infra/client-register/local.yaml
 portForward:
 - resourceType: service
   resourceName: sse-server

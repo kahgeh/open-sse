@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package contracts_broker_v0_1_x;
+
+service Clients {
+  rpc save(SaveClientRequest) returns (SaveResponse);
+}
+
+message SaveClientRequest {
+  string client_id=1;
+  bytes server_ipv4_addr=2;
+}
+
+message SaveResponse {
+  bool success=1;
+  string message=2;
+}

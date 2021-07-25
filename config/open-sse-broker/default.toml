@@ -8,6 +8,9 @@ port = "8081"
 url_prefix = "/sse"
 allowed_origin = "ignored"
 
+[grpc]
+port="50052"
+
 [logging]
 level = "INFO"
 correlation_id_http_header = "x-correlation-id"
@@ -17,5 +20,5 @@ redis="redis://client-register/"
 
 [readiness]
 check="false"
-retry_count="5"
-retry_interval_in_seconds="3"
+retry_count="6"
+retry_interval_in_seconds="5"

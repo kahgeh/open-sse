@@ -4,5 +4,6 @@ members = [
     "server",
     "broker",
     "app-ops",
-    "actix-web-utils"
+    "actix-web-utils",
+    "broker-protobufs"
 ]

@@ -35,3 +35,8 @@ portForward:
   port: 80
   localPort: 8092
   address: 0.0.0.0
+- resourceType: service
+  resourceName: client-register
+  port: 6379
+  localPort: 6379
+  address: 0.0.0.0

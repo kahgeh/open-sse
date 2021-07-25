@@ -11,3 +11,11 @@ allowed_origin = "http://ensure_this_is_set.com"
 [logging]
 level = "INFO"
 correlation_id_http_header = "x-correlation-id"
+
+[outgoing_endpoints]
+broker="sse-broker:9000"
+
+[readiness]
+check="false"
+retry_count="5"
+retry_interval_in_seconds="3"

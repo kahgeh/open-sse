@@ -1,13 +1,6 @@
 use super::*;
 use futures::{StreamExt};
 use std::str::from_utf8;
-use std::sync::{Mutex, MutexGuard};
-use tracing_subscriber::fmt::Subscriber;
-use tracing_subscriber::{
-    EnvFilter,
-};
-use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::fmt::format::Format;
 use tracing_test::{traced_test};
 
 async fn get_next_stream_value(stream :&mut ReceiverStream<Result<Bytes, TransmissionError>>) ->String {
@@ -101,7 +94,8 @@ async fn should_not_register_client_when_connection_acknowledgement_cannot_be_se
     };
     client_rx.close();
 
-    sse_exchange.wait().await;
+    let wait_result=sse_exchange.wait().await;
+    assert!(wait_result.is_ok());
 
     let client_count =sse_exchange.get_client_count().await.unwrap_or_else(|_|0);
     assert!(logs_contain(expected_connection_failure_log_entry.as_str()));

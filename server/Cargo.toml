@@ -10,6 +10,7 @@ edition = "2018"
 bytes="1.0.1"
 tonic="0.5.0"
 ginepro="0.2.0"
+futures="0.3.16"
 broker-protobufs={path="../broker-protobufs", version="0.1.0"}
 app-ops= {path="../app-ops", version="0.1.0"}
 actix-web-utils = {path="../actix-web-utils", version="0.1.0"}

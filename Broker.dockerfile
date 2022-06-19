@@ -1,6 +1,6 @@
 ARG BASEPATH=/app
 ARG COMPONENT="open-sse-broker"
-FROM rust:1.53.0 as planner
+FROM rust:1.61.0 as planner
 ARG BASEPATH
 WORKDIR ${BASEPATH}
 # We only pay the installation cost once,
@@ -10,7 +10,7 @@ RUN rustup component add rustfmt
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM rust:1.53.0 as cacher
+FROM rust:1.61.0 as cacher
 ARG BASEPATH
 WORKDIR ${BASEPATH}
 RUN cargo install cargo-chef
@@ -18,7 +18,7 @@ RUN rustup component add rustfmt
 COPY --from=planner ${BASEPATH}/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
-FROM rust:1.53.0 as builder
+FROM rust:1.61.0 as builder
 ARG COMPONENT
 ARG BASEPATH
 WORKDIR ${BASEPATH}
@@ -29,7 +29,7 @@ COPY --from=cacher ${BASEPATH}/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
 RUN cargo build --release --bin ${COMPONENT}
 
-FROM rust:1.53.0 as runtime
+FROM rust:1.61.0 as runtime
 ARG COMPONENT
 ARG BASEPATH
 ARG GRPC_PORT=9000

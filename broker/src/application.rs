@@ -29,6 +29,7 @@ pub struct Application {
 
 async fn start_grpc_server(addr: SocketAddr, redis_connection_grpc: Data<MultiplexedConnection>)->std::io::Result<()>{
     let result = tonic::transport::Server::builder()
+        .layer()
         .add_service(ClientsServer::new(
             BrokerManagedClientsService::new(redis_connection_grpc)))
         .serve(addr).await;

@@ -4,3 +4,4 @@ use serde::Serialize;
 pub struct GetStatisticResponse {
     pub client_count: u32,
 }
+

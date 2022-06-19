@@ -5,7 +5,7 @@ function App() {
     const [messages, setMessages] = useState<string[]>([]);
 
     useEffect(() => {
-        var source = new EventSource(`http://localhost:8090/sse/clients/${sseClientId}/events`);
+        var source = new EventSource(`https://ui-events-service.ff.k8s.xero-test.com/sse/clients/${sseClientId}/events`);
         const notify = (e: MessageEvent) => setMessages(prevMessages => [e.data, ...prevMessages]);
         source.addEventListener('message', notify);
         return () => source.removeEventListener('message', notify);

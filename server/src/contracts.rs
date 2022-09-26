@@ -1,6 +1,6 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
-pub struct GetStatisticResponse {
-    pub client_count: u32,
+#[derive(Serialize, Deserialize)]
+pub(crate) struct HelloResponse {
+    pub message: String,
 }

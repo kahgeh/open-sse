@@ -1,48 +1,38 @@
-mod settings;
-mod mappers;
-mod application;
-mod sse_exchange;
-mod routes;
 mod contracts;
+mod logging;
+mod process_control;
 
-use tracing::{debug, info, error};
-use tokio::{select, signal::{ctrl_c}};
-use futures::future::{join_all};
-use crate::settings::{AppSettings};
+use axum::{http::StatusCode, routing::get, Json, Router};
+use contracts::HelloResponse;
+use process_control::shutdown_signal;
+use std::{error::Error, net::SocketAddr};
+use tower_http::trace::TraceLayer;
+use tracing::{info, instrument, span, Level};
 
-use app_ops::{LoggingBuilder, ApplicationStartUpDisplayInfo};
-use crate::application::{Application, StartUpError};
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    logging::setup()?;
+    let app_span = span!(Level::ERROR, "application", commit_id = "bla");
+    let app_span_main = app_span.clone();
+    let app = Router::new()
+        .route("/", get(root))
+        .layer(TraceLayer::new_for_http().make_span_with(app_span));
 
-#[actix_web::main]
-async fn main()-> Result<(), StartUpError> {
-    let app_settings = AppSettings::load();
-
-    LoggingBuilder::new((&app_settings).into())
-        .init_default();
-
-    debug!("app settings loaded {:?}", app_settings);
-
-    let ApplicationStartUpDisplayInfo{ environment_name, is_debug, port} = (&app_settings).into();
-    info!(Environment=&environment_name[..], IsDebug=&is_debug[..], Port=&port[..], "Application started");
-
-    let (http_server, sse_exchange_task)= match Application::new(app_settings.settings.http.clone())
-        .start(app_settings.clone()){
-            Ok(services)=>services,
-            Err(e)=>{
-                error!("Fail to start services {:?}", e);
-                return Err(e);
-            },
-        };
-
-    let services_task = join_all(vec![tokio::spawn(http_server),sse_exchange_task]) ;
-    select! {
-        _ = services_task => {
-            info!("services stopped");
-        }
-        _ = ctrl_c() => {
-            info!("application terminated because of cancellation signal ctrl+c");
-        }
-    };
-
+    app_span_main.in_scope(|| info!("Application started"));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap();
+    app_span_main.in_scope(|| info!("Application shutdown"));
+    logging::teardown();
     Ok(())
+}
+
+#[instrument(level = "info")]
+async fn root() -> Result<Json<HelloResponse>, StatusCode> {
+    Ok(Json(HelloResponse {
+        message: String::from("Hello world"),
+    }))
 }
